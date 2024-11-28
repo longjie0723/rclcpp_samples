@@ -29,6 +29,7 @@ public:
                 return;
             }
         }
+        
         auto request = std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
         request->a = 1;
         request->b = 2;
