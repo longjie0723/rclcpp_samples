@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(service)
+project(call_service_from_lifecycle_node)
 
 # Add compile options for GCC or Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -18,13 +18,12 @@ find_package(std_srvs REQUIRED)
 include_directories(include)
 
 # Add the shared library
-add_library(service_lib SHARED
+add_library(simple_lifecycle_lib SHARED
   src/simple_lifecycle_node.cpp
-  src/simple_node.cpp
 )
 
 # Add dependencies to the library
-ament_target_dependencies(service_lib
+ament_target_dependencies(simple_lifecycle_lib
   rclcpp
   rclcpp_lifecycle
   example_interfaces
@@ -33,52 +32,40 @@ ament_target_dependencies(service_lib
 )
 
 # Register nodes for rclcpp_components
-rclcpp_components_register_node(service_lib
-  PLUGIN "SimpleLifecycle"  # Registering SimpleLifecycle plugin
-  EXECUTABLE simple_lifecycle_node_exec
-)
+# rclcpp_components_register_node(simple_lifecycle_lib
+#   PLUGIN "SimpleLifecycle"  # Registering SimpleLifecycle plugin
+#   EXECUTABLE simple_lifecycle_node
+# )
 
-rclcpp_components_register_node(service_lib
-  PLUGIN "SimpleNode"        # Registering SimpleNode plugin
-  EXECUTABLE simple_node_exec
-)
+# rclcpp_components_register_node(call_service_from_lifecycle
+#   PLUGIN "SimpleNode"        # Registering SimpleNode plugin
+#   EXECUTABLE simple_node_exec
+# )
 
 # Add executables
-# add_executable(simple_lifecycle_node_exec src/simple_lifecycle_node.cpp)
+add_executable(simple_lifecycle_node src/simple_lifecycle_node.cpp)
 # add_executable(simple_node_exec src/simple_node.cpp)
 
 # Link the shared library to the executables
-target_link_libraries(simple_lifecycle_node_exec service_lib)
-target_link_libraries(simple_node_exec service_lib)
+target_link_libraries(simple_lifecycle_node simple_lifecycle_lib)
 
 # Add ament dependencies for the executables
-ament_target_dependencies(simple_lifecycle_node_exec
+ament_target_dependencies(simple_lifecycle_lib
   rclcpp
   rclcpp_lifecycle
   example_interfaces
   rclcpp_components
   std_srvs
 )
-
-ament_target_dependencies(simple_node_exec
-  rclcpp
-  rclcpp_lifecycle
-  example_interfaces
-  rclcpp_components
-  std_srvs
-)
-
-
 
 # Install targets
 install(TARGETS
-  service_lib
-  simple_lifecycle_node_exec
-  simple_node_exec
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  # DESTINATION lib/${PROJECT_NAME}
+  simple_lifecycle_lib
+  simple_lifecycle_node
+  # ARCHIVE DESTINATION lib
+  # LIBRARY DESTINATION lib
+  # RUNTIME DESTINATION bin
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 # Install include directories

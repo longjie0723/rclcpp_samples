@@ -1,4 +1,4 @@
-#include "service/add_two_ints_client.hpp"
+#include "call_service_from_lifecycle_node/add_two_ints_client.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 
@@ -9,18 +9,23 @@ public:
     SimpleLifecycleNode(const rclcpp::NodeOptions &options)
     : rclcpp_lifecycle::LifecycleNode("simple_lifecycle_node", options)
     {
-        client_ = std::make_unique<LifecycleClientNode>(shared_from_this());
-
-        auto handle_add_two_ints =
-        [this](const std::shared_ptr<std_srvs::srv::Empty::Request> request,
-            std::shared_ptr<std_srvs::srv::Empty::Response> response) -> void
-        {
-            RCLCPP_INFO(get_logger(), "Execute simple lifecycle callback");
-            client_->execute();
-            RCLCPP_INFO(get_logger(), "Finished simple lifecycle callback.");
-        };
-        srv_ = this->create_service<std_srvs::srv::Empty>("/simple_lifecycle_node/add_two_ints", handle_add_two_ints);
+        srv_ = this->create_service<std_srvs::srv::Empty>(
+            "/simple_lifecycle_node/add_two_ints", 
+            std::bind(&SimpleLifecycleNode::simple_callback, this, std::placeholders::_1, std::placeholders::_2));
     };
+
+    void initialize()
+    {
+        client_ = std::make_unique<LifecycleClientNode>(shared_from_this());
+    }
+
+    void simple_callback(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                   const std::shared_ptr<std_srvs::srv::Empty::Response> response)
+    {
+        RCLCPP_INFO(this->get_logger(), "Execute simple lifecycle node callback.");
+        client_->execute();
+        RCLCPP_INFO(this->get_logger(), "Finished simple lifecycle node callback.");
+    }
 
     using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
     
@@ -65,15 +70,17 @@ private:
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srv_;
 };
 
-// int main(int argc, char * argv[])
-// {
-//     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-//     rclcpp::init(argc, argv);
-//     rclcpp::executors::MultiThreadedExecutor executor;
-//     rclcpp::NodeOptions options;
-//     std::shared_ptr<SimpleLifecycleNode> node = std::make_shared<SimpleLifecycleNode>(options);
-//     executor.add_node(node->get_node_base_interface());
-//     executor.spin();
-// }
+int main(int argc, char * argv[])
+{
+    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+    rclcpp::init(argc, argv);
+    rclcpp::NodeOptions options;
+    std::shared_ptr<SimpleLifecycleNode> node = std::make_shared<SimpleLifecycleNode>(options);
+    node->initialize();
 
-RCLCPP_COMPONENTS_REGISTER_NODE(SimpleLifecycleNode)
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(node->get_node_base_interface());
+    executor.spin();
+}
+
+// RCLCPP_COMPONENTS_REGISTER_NODE(SimpleLifecycleNode)
