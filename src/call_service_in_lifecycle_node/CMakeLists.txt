@@ -12,7 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(example_interfaces REQUIRED)
 find_package(rclcpp_components REQUIRED)
-
+find_package(std_srvs REQUIRED)
 
 # Include directories
 include_directories(include)
@@ -27,6 +27,7 @@ ament_target_dependencies(call_service_in_lifecycle_node_lib
   rclcpp_lifecycle
   example_interfaces
   rclcpp_components
+  std_srvs
 )
 
 # Add the executable
@@ -52,6 +53,7 @@ ament_target_dependencies(call_service_in_lifecycle_node
   rclcpp_lifecycle
   example_interfaces
   rclcpp_components
+  std_srvs
 )
 
 # Install targets
