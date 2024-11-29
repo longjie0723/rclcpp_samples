@@ -9,11 +9,12 @@ public:
     SimpleLifecycleNode(const rclcpp::NodeOptions &options)
     : rclcpp_lifecycle::LifecycleNode("simple_lifecycle_node", options)
     {
+        client_ = std::make_unique<LifecycleClientNode>(shared_from_this());
+
         auto handle_add_two_ints =
         [this](const std::shared_ptr<std_srvs::srv::Empty::Request> request,
             std::shared_ptr<std_srvs::srv::Empty::Response> response) -> void
         {
-            client_ = std::make_unique<LifecycleClientNode>(shared_from_this());
             RCLCPP_INFO(get_logger(), "Execute simple lifecycle callback");
             client_->execute();
             RCLCPP_INFO(get_logger(), "Finished simple lifecycle callback.");

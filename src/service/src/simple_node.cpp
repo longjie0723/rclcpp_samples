@@ -19,24 +19,14 @@ public:
                 RCLCPP_INFO(this->get_logger(), "Finished simple callback.");
             };
 
-        srv_ = this->create_service<std_srvs::srv::Empty>("/simple_node/add_two_ints", simple_callback);
+        add_two_ints_srv_ = this->create_service<std_srvs::srv::Empty>("/simple_node/add_two_ints", simple_callback);
     }
 
 private:
     std::unique_ptr<ClientNode> client_;
-    rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srv_;
+    rclcpp::Service<std_srvs::srv::Empty>::SharedPtr add_two_ints_srv_;
+    rclcpp::Service<std_srvs::srv::Empty>::SharedPtr initialize_srv_;
 };
-
-// int main(int argc, char * argv[])
-// {
-//     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-//     rclcpp::init(argc, argv);
-//     rclcpp::executors::MultiThreadedExecutor executor;
-//     rclcpp::NodeOptions options;
-//     std::shared_ptr<SimpleNode> node = std::make_shared<SimpleNode>(options);
-//     executor.add_node(node->get_node_base_interface());
-//     executor.spin();
-// }
 
 // Register the node as a component
 RCLCPP_COMPONENTS_REGISTER_NODE(SimpleNode)
