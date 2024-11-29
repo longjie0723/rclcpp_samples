@@ -13,7 +13,7 @@ using namespace std::chrono_literals;
 class ClientNode
 {
 public:
-    ClientNode(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode>& node)
+    ClientNode(const std::shared_ptr<rclcpp::Node>& node)
         : node_(node)
     {}
 
@@ -37,7 +37,7 @@ public:
         // [test 1]
         using ServiceResponseFuture = rclcpp::Client<example_interfaces::srv::AddTwoInts>::SharedFuture;
         auto response_received_callback = [this](ServiceResponseFuture future) {
-            RCLCPP_INFO(this->node_->get_logger(), "Executed response callback.");
+            RCLCPP_INFO(this->node_->get_logger(), "Execute callback.");
             auto result = future.get();
             RCLCPP_INFO(this->node_->get_logger(), "Result: %ld", result->sum);
         };
@@ -55,6 +55,6 @@ public:
     }
 
 private:
-    std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
+    std::shared_ptr<rclcpp::Node> node_;
     rclcpp::Client<example_interfaces::srv::AddTwoInts>::SharedPtr client_;
 };

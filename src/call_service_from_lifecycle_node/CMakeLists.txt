@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(call_service_in_lifecycle_node)
+project(call_service_from_lifecycle_node)
 
 # Add compile options for GCC or Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -17,12 +17,13 @@ find_package(std_srvs REQUIRED)
 # Include directories
 include_directories(include)
 
-# Add the library (if necessary)
-add_library(call_service_in_lifecycle_node_lib SHARED
-  src/simple_lifecycle.cpp
+# Add the shared library
+add_library(simple_lifecycle_lib SHARED
+  src/simple_lifecycle_node.cpp
 )
 
-ament_target_dependencies(call_service_in_lifecycle_node_lib
+# Add dependencies to the library
+ament_target_dependencies(simple_lifecycle_lib
   rclcpp
   rclcpp_lifecycle
   example_interfaces
@@ -30,25 +31,26 @@ ament_target_dependencies(call_service_in_lifecycle_node_lib
   std_srvs
 )
 
-# Add the executable
-add_executable(call_service_in_lifecycle_node
-  src/simple_lifecycle.cpp
-)
-
-# register node 
-# rclcpp_components_register_node(call_service_in_lifecycle_node_lib
-#   PLUGIN "SimpleLifecycle"
-#   EXECUTABLE call_service_in_lifecycle_node
+# Register nodes for rclcpp_components
+# rclcpp_components_register_node(simple_lifecycle_lib
+#   PLUGIN "SimpleLifecycle"  # Registering SimpleLifecycle plugin
+#   EXECUTABLE simple_lifecycle_node
 # )
 
+# rclcpp_components_register_node(call_service_from_lifecycle
+#   PLUGIN "SimpleNode"        # Registering SimpleNode plugin
+#   EXECUTABLE simple_node_exec
+# )
 
-# Link the library to the executable
-target_link_libraries(call_service_in_lifecycle_node
-  call_service_in_lifecycle_node_lib
-)
+# Add executables
+add_executable(simple_lifecycle_node src/simple_lifecycle_node.cpp)
+# add_executable(simple_node_exec src/simple_node.cpp)
 
-# Add ament dependencies for the executable
-ament_target_dependencies(call_service_in_lifecycle_node
+# Link the shared library to the executables
+target_link_libraries(simple_lifecycle_node simple_lifecycle_lib)
+
+# Add ament dependencies for the executables
+ament_target_dependencies(simple_lifecycle_lib
   rclcpp
   rclcpp_lifecycle
   example_interfaces
@@ -58,8 +60,8 @@ ament_target_dependencies(call_service_in_lifecycle_node
 
 # Install targets
 install(TARGETS
-  call_service_in_lifecycle_node
-  call_service_in_lifecycle_node_lib
+  simple_lifecycle_lib
+  simple_lifecycle_node
   # ARCHIVE DESTINATION lib
   # LIBRARY DESTINATION lib
   # RUNTIME DESTINATION bin
@@ -71,7 +73,7 @@ install(DIRECTORY include/
   DESTINATION include
 )
 
-# Install launch files
+# Install launch files (uncomment if necessary)
 # install(DIRECTORY launch
 #   DESTINATION share/${PROJECT_NAME}
 # )
@@ -79,10 +81,6 @@ install(DIRECTORY include/
 # Enable testing if required
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # Skip copyright linter (adjust if you add licenses)
-  set(ament_cmake_copyright_FOUND TRUE)
-  # Skip cpplint (adjust if this package is in a git repository)
-  set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
 
