@@ -9,25 +9,31 @@ public:
     SimpleLifecycle(const rclcpp::NodeOptions &options)
     : rclcpp_lifecycle::LifecycleNode("simple_lifecycle", options)
     {
-        auto handle_add_two_ints =
-        [this](const std::shared_ptr<std_srvs::srv::Empty::Request> request,
-            std::shared_ptr<std_srvs::srv::Empty::Response> response) -> void
-        {
-            RCLCPP_INFO(get_logger(), "Execute /simple_lifecycle/add_two_ints.");
-            client = std::make_unique<ClientNode>(shared_from_this());
-            client->execute();
-            RCLCPP_INFO(get_logger(), "Finished /simple_lifecycle/add_two_ints.");
-        };
-        srv_ = this->create_service<std_srvs::srv::Empty>("/simple_lifecycle/add_two_ints", handle_add_two_ints);
+        srv_ = this->create_service<std_srvs::srv::Empty>(
+            "/simple_lifecycle/add_two_ints",
+            std::bind(&SimpleLifecycle::handle_add_two_ints, this, std::placeholders::_1, std::placeholders::_2)
+        );
     };
+
+    void initialize()
+    {
+        client_ = std::make_shared<ClientNode>(shared_from_this());
+    }
+
+    void handle_add_two_ints(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                            std::shared_ptr<std_srvs::srv::Empty::Response> response)
+    {
+        RCLCPP_INFO(get_logger(), "Execute /simple_lifecycle/add_two_ints.");
+        client_->execute();
+        RCLCPP_INFO(get_logger(), "Finished /simple_lifecycle/add_two_ints.");
+    }
 
     using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
     
     CallbackReturn on_configure(const rclcpp_lifecycle::State &)
     {
-        client = std::make_unique<ClientNode>(shared_from_this());
         RCLCPP_INFO(get_logger(), "Configuring");
-        client->execute();
+        client_->execute();
         return CallbackReturn::SUCCESS;
     }
     
@@ -61,7 +67,7 @@ public:
         return CallbackReturn::SUCCESS;
     };
 private:
-    std::unique_ptr<ClientNode> client;
+    std::shared_ptr<ClientNode> client_;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srv_;
     
 };
@@ -73,6 +79,7 @@ int main(int argc, char * argv[])
     rclcpp::executors::MultiThreadedExecutor executor;
     rclcpp::NodeOptions options;
     std::shared_ptr<SimpleLifecycle> node = std::make_shared<SimpleLifecycle>(options);
+    node->initialize();
     executor.add_node(node->get_node_base_interface());
     executor.spin();
 }
