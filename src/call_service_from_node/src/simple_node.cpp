@@ -16,7 +16,7 @@ public:
 
     void initialize()
     {
-        client_ = std::make_unique<ClientNode>(shared_from_this());
+        client_ = std::make_shared<ClientNode>(shared_from_this());
     }
 
     void simple_callback(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -28,7 +28,7 @@ public:
     }
 
 private:
-    std::unique_ptr<ClientNode> client_;
+    std::shared_ptr<ClientNode> client_;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srv_;
 };
 

@@ -16,7 +16,7 @@ public:
 
     void initialize()
     {
-        client_ = std::make_unique<LifecycleClientNode>(shared_from_this());
+        client_ = std::make_shared<LifecycleClientNode>(shared_from_this());
     }
 
     void simple_callback(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
@@ -66,7 +66,7 @@ public:
         return CallbackReturn::SUCCESS;
     };
 private:
-    std::unique_ptr<LifecycleClientNode> client_;
+    std::shared_ptr<LifecycleClientNode> client_;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr srv_;
 };
 
